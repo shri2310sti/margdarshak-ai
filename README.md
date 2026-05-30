@@ -157,7 +157,7 @@ Frontend runs at → **http://localhost:3000**
 
 ## 📸 Screenshots
 
-> Add screenshots here after running the project.
+
 
 ---
 
