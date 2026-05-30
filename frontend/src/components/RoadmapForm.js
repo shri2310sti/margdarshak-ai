@@ -1,0 +1,154 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { generateRoadmap } from "@/lib/api";
+import toast from "react-hot-toast";
+
+const EXPERIENCE_LEVELS = [
+    { value: "beginner", label: "Beginner", desc: "Just starting out", icon: "🌱" },
+    { value: "intermediate", label: "Intermediate", desc: "Some experience", icon: "🚀" },
+    { value: "advanced", label: "Advanced", desc: "Deep expertise", icon: "⚡" },
+];
+
+export default function RoadmapForm({ onRoadmapGenerated, prefillRole = "" }) {
+    const [form, setForm] = useState({
+        targetRole: "",
+        currentSkills: "",
+        experienceLevel: "beginner",
+    });
+    const [loading, setLoading] = useState(false);
+
+    // When a quick-pick chip is clicked, auto-fill the role field
+    useEffect(() => {
+        if (prefillRole) {
+            setForm((prev) => ({ ...prev, targetRole: prefillRole }));
+        }
+    }, [prefillRole]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!form.targetRole.trim() || !form.currentSkills.trim()) {
+            toast.error("Please fill in all required fields.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const result = await generateRoadmap(form);
+            toast.success("Roadmap generated! 🎉");
+            onRoadmapGenerated(result.data);
+            setForm({ targetRole: "", currentSkills: "", experienceLevel: "beginner" });
+        } catch (err) {
+            const msg = err?.response?.data?.message || "Failed to generate. Is the backend running?";
+            toast.error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Card header strip */}
+            <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+                <h2
+                    className="text-white font-bold text-lg"
+                    style={{ fontFamily: "Syne, sans-serif" }}
+                >
+                    Generate Your Roadmap
+                </h2>
+                <p className="text-indigo-200 text-xs mt-0.5">
+                    Fill in the details below and get your personalized career path
+                </p>
+            </div>
+
+            <div className="p-6">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Target Role */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                            Target Role <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="targetRole"
+                            value={form.targetRole}
+                            onChange={handleChange}
+                            placeholder="e.g. Full Stack Developer, Chef, Data Scientist…"
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                            disabled={loading}
+                            required
+                        />
+                    </div>
+
+                    {/* Current Skills */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                            Current Skills <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            name="currentSkills"
+                            value={form.currentSkills}
+                            onChange={handleChange}
+                            placeholder="e.g. HTML, CSS, basic JavaScript, Python (comma-separated)"
+                            rows={3}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm resize-none"
+                            disabled={loading}
+                            required
+                        />
+                        <p className="text-xs text-slate-400 mt-1">
+                            Separate skills with commas. Type "none" if you're starting fresh.
+                        </p>
+                    </div>
+
+                    {/* Experience Level */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                            Experience Level
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {EXPERIENCE_LEVELS.map((lvl) => (
+                                <button
+                                    key={lvl.value}
+                                    type="button"
+                                    onClick={() => setForm((prev) => ({ ...prev, experienceLevel: lvl.value }))}
+                                    disabled={loading}
+                                    className={`p-3 rounded-xl border-2 text-left transition-all duration-150 ${form.experienceLevel === lvl.value
+                                            ? "border-indigo-500 bg-indigo-50"
+                                            : "border-slate-200 bg-white hover:border-indigo-200"
+                                        }`}
+                                >
+                                    <div className="text-base mb-0.5">{lvl.icon}</div>
+                                    <div className="text-xs font-bold text-slate-800">{lvl.label}</div>
+                                    <div className="text-xs text-slate-400 mt-0.5">{lvl.desc}</div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-700 hover:to-cyan-600 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg text-sm flex items-center justify-center gap-2"
+                    >
+                        {loading ? (
+                            <>
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                </svg>
+                                Generating your roadmap…
+                            </>
+                        ) : (
+                            "✨ Generate My Roadmap"
+                        )}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+}
