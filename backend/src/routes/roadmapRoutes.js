@@ -1,22 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const {
-    generateAndSaveRoadmap,
-    getAllRoadmaps,
-    getRoadmapById,
-    deleteRoadmap,
+  generateAndSaveRoadmap,
+  getAllRoadmaps,
+  getRoadmapById,
+  deleteRoadmap,
 } = require("../controllers/roadmapController");
+const { protect, optionalAuth } = require("../middleware/authMiddleware");
 
-// POST   /roadmap/generate   → generate and save a new roadmap
-router.post("/roadmap/generate", generateAndSaveRoadmap);
+// Public with optional auth — guests can generate but won't have history saved under a user
+router.post("/roadmap/generate", optionalAuth, generateAndSaveRoadmap);
 
-// GET    /roadmaps            → get all roadmaps
-router.get("/roadmaps", getAllRoadmaps);
-
-// GET    /roadmap/:id         → get single roadmap by id
-router.get("/roadmap/:id", getRoadmapById);
-
-// DELETE /roadmap/:id         → delete a roadmap
-router.delete("/roadmap/:id", deleteRoadmap);
+// Protected — only logged in users can see/delete their history
+router.get("/roadmaps", protect, getAllRoadmaps);
+router.get("/roadmap/:id", protect, getRoadmapById);
+router.delete("/roadmap/:id", protect, deleteRoadmap);
 
 module.exports = router;
