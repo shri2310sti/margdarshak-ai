@@ -1,33 +1,34 @@
 import axios from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://margdarshak-ai-xfro.onrender.com";
+const BASE_URL = "https://margdarshak-ai-xfro.onrender.com";
 
-const api = axios.create({
-    baseURL: BASE_URL,
-    headers: { "Content-Type": "application/json" },
-    timeout: 15000,
-});
+function getAuthHeader() {
+  try {
+    const user = JSON.parse(localStorage.getItem("margdarshak_user"));
+    return user?.token ? { Authorization: `Bearer ${user.token}` } : {};
+  } catch {
+    return {};
+  }
+}
 
-// ─── Generate a roadmap ───────────────────────────────────────────────────────
+const api = axios.create({ baseURL: BASE_URL });
+
 export async function generateRoadmap(payload) {
-    const response = await api.post("/roadmap/generate", payload);
-    return response.data;
+  const res = await api.post("/roadmap/generate", payload, { headers: getAuthHeader() });
+  return res.data;
 }
 
-// ─── Fetch all roadmaps ───────────────────────────────────────────────────────
 export async function fetchAllRoadmaps() {
-    const response = await api.get("/roadmaps");
-    return response.data;
+  const res = await api.get("/roadmaps", { headers: getAuthHeader() });
+  return res.data;
 }
 
-// ─── Fetch single roadmap ─────────────────────────────────────────────────────
 export async function fetchRoadmapById(id) {
-    const response = await api.get(`/roadmap/${id}`);
-    return response.data;
+  const res = await api.get(`/roadmap/${id}`, { headers: getAuthHeader() });
+  return res.data;
 }
 
-// ─── Delete a roadmap ─────────────────────────────────────────────────────────
 export async function deleteRoadmap(id) {
-    const response = await api.delete(`/roadmap/${id}`);
-    return response.data;
+  const res = await api.delete(`/roadmap/${id}`, { headers: getAuthHeader() });
+  return res.data;
 }
