@@ -155,12 +155,6 @@ Frontend runs at → **http://localhost:3000**
 
 ---
 
-## 📸 Screenshots
-
-
-
----
-
 ## 👤 Author
 
 Built for Margdarshak AI — Full Stack Developer Intern Assignment
