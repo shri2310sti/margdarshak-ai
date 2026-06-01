@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://margdarshak-ai-xfro.onrender.com";
 
 export default function RegisterPage() {
     const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
